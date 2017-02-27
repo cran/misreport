@@ -120,7 +120,7 @@ $(document).ready(function () {
 
 
 <!--- 
-rmarkdown::render("~/Dropbox (Personal)/Software/misreport/inst/docs/misreport-vignette.Rmd")
+rmarkdown::render("~/Dropbox (Personal)/Software/misreport/vignettes/misreport-vignette.Rmd")
 -->
 <p><link href="data:text/css; charset=utf-8,%40font%2Dface%20%7B%0A%20%20font%2Dfamily%3A%20%27Open%20Sans%27%3B%0A%20%20font%2Dstyle%3A%20normal%3B%0A%20%20font%2Dweight%3A%20400%3B%0A%20%20src%3A%20local%28%27Open%20Sans%27%29%2C%20local%28%27OpenSans%27%29%2C%20url%28https%3A%2F%2Ffonts%2Egstatic%2Ecom%2Fs%2Fopensans%2Fv13%2FcJZKeOuBrn4kERxqtaUH3aCWcynf%5FcDxXwCLxiixG1c%2Ettf%29%20format%28%27truetype%27%29%3B%0A%7D%0A%40font%2Dface%20%7B%0A%20%20font%2Dfamily%3A%20%27Open%20Sans%27%3B%0A%20%20font%2Dstyle%3A%20normal%3B%0A%20%20font%2Dweight%3A%20700%3B%0A%20%20src%3A%20local%28%27Open%20Sans%20Bold%27%29%2C%20local%28%27OpenSans%2DBold%27%29%2C%20url%28https%3A%2F%2Ffonts%2Egstatic%2Ecom%2Fs%2Fopensans%2Fv13%2Fk3k702ZOKiLJc3WVjuplzInF5uFdDttMLvmWuJdhhgs%2Ettf%29%20format%28%27truetype%27%29%3B%0A%7D%0A" rel="stylesheet" type="text/css"></p>
 <script type="text/x-mathjax-config"> 
@@ -231,12 +231,12 @@ The Statistical Analysis of Misreporting on Sensitive Survey Questions
 Using the <a href="https://cran.r-project.org/package=misreport"><code>misreport</code></a> package in R
 </h2>
 <h5 style="margin-top: 30px; font-weight: 300">
-<strong>Gregory Eady</strong> (December 04, 2016)
+<strong>Gregory Eady</strong> (February 26, 2017)
 </h5>
 <hr style="margin-bottom: 0px; margin-top: 18px; border:1px; border-top: dotted 1px; color:#5300C9">
 <div id="section1" class="section level1">
 <h1>1. Introduction</h1>
-<p>This document provides a brief introduction to the R package <a href="https://cran.r-project.org/package=misreport"><code>misreport</code></a>. The package implements the method introduced in <span class="citation">Eady (2016)</span> to permit researchers to statistically examine the predictors of misreporting on sensitive survey questions. In brief, the goal of the method is to model whether survey respondents provide one response to a sensitive item in a list experiment — a measurement technique designed to elicit a truthful response — but answer otherwise when asked to reveal that response openly on a direct question.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> <a href="https://cran.r-project.org/package=misreport"><code>misreport</code></a> is made available through the Comprehensive R Archive Network (CRAN).</p>
+<p>This document provides a brief introduction to the R package <a href="https://cran.r-project.org/package=misreport"><code>misreport</code></a>. The package implements the method introduced in <span class="citation">Eady (Forthcoming)</span> to permit researchers to statistically examine the predictors of misreporting on sensitive survey questions. In brief, the goal of the method is to model whether survey respondents provide one response to a sensitive item in a list experiment — a measurement technique designed to elicit a truthful response — but answer otherwise when asked to reveal that response openly on a direct question.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> <a href="https://cran.r-project.org/package=misreport"><code>misreport</code></a> is made available through the Comprehensive R Archive Network (CRAN).</p>
 </div>
 <div id="section2" class="section level1">
 <h1>2. Covariates</h1>
@@ -244,9 +244,9 @@ Using the <a href="https://cran.r-project.org/package=misreport"><code>misreport
 <p>To begin, let’s say that we have <span class="math inline">\(10000\)</span> respondents <span class="math inline">\(i = 1, \ldots, 10000\)</span> in a data.frame <code>A</code>:</p>
 <pre class="r"><code>n &lt;- 10000
 A &lt;- data.frame(i = 1:n)</code></pre>
-<p>For concreteness, we generate respondent characteristics that represent age, gender, and education:</p>
+<p>For concreteness, we will generate respondent characteristics that we will say represent age, gender, and education:</p>
 <pre class="r"><code>A$age &lt;- round(runif(n, 18, 90))
-A$gender &lt;- sample(c(&quot;Man&quot;, &quot;Woman&quot;), n, replace = TRUE, prob = c(0.52, 0.48))
+A$gender &lt;- sample(c(&quot;Woman&quot;, &quot;Man&quot;), n, replace = TRUE, prob = c(0.52, 0.48))
 A$education &lt;- sample(c(&quot;Below high school&quot;,
                         &quot;High school&quot;,
                         &quot;College&quot;),
@@ -254,28 +254,27 @@ A$education &lt;- sample(c(&quot;Below high school&quot;,
 A$education &lt;- factor(A$education, levels = c(&quot;Below high school&quot;,
                                               &quot;High school&quot;,
                                               &quot;College&quot;))</code></pre>
-<p>The data now appear as follows:</p>
+<p>Our simulated data now appear as follows:</p>
 <pre class="r"><code># Display first 10 rows of the data
 print(A[1:10, ], row.names = FALSE)</code></pre>
 <pre><code>  i age gender         education
-  1  50    Man           College
-  2  58  Woman Below high school
-  3  75    Man Below high school
-  4  23    Man       High school
-  5  62  Woman       High school
-  6  19  Woman           College
-  7  66    Man Below high school
-  8  63  Woman           College
-  9  61  Woman           College
- 10  72  Woman           College</code></pre>
+  1  47  Woman       High school
+  2  87  Woman Below high school
+  3  57    Man Below high school
+  4  73    Man           College
+  5  58    Man           College
+  6  48  Woman       High school
+  7  52  Woman       High school
+  8  62  Woman       High school
+  9  35    Man       High school
+ 10  36  Woman Below high school</code></pre>
 </div>
 <div id="section3" class="section level1">
 <h1>3. Data-generating process</h1>
-<p>We now simulate responses to a list experiment and a direct question. In this vignette, we’ll assume that answering affirmatively to the sensitive item is to give the socially unacceptable response. In other words, <span class="math inline">\(Z_i = 1\)</span> or <span class="math inline">\(D_i = 1\)</span> indicates providing the socially unacceptable response.</p>
-<p>To begin, we’ll first assign each respondent at random to the treatment group or the control group:</p>
-<pre class="r"><code># Assign to treatment with probability 0.5
-A$treatment &lt;- rbinom(n, 1, 0.5)</code></pre>
-<p>Now we’ll define the population parameters in the sensitive-item sub-model and simulate responses to the sensitive item:</p>
+<p>We now simulate responses to a list experiment and a direct question. In this vignette, we’ll assume that answering affirmatively to the sensitive item is to give the socially unacceptable response. In other words, responses of <span class="math inline">\(Z_i = 1\)</span> or <span class="math inline">\(D_i = 1\)</span> indicate providing the socially unacceptable response, where <span class="math inline">\(Z_i\)</span> denotes the response to the sensitive item in the list experiment and <span class="math inline">\(D_i\)</span> denotes the response to the direct question.</p>
+<p>To begin, we’ll first assign each respondent at random to the treatment or control group:</p>
+<pre class="r"><code>A$treatment &lt;- sample(c(rep(0, n/2), rep(1, n/2)), n)</code></pre>
+<p>We’ll define the population parameters in the sensitive-item sub-model as follows and then simulate whether respondents hold the sensitive belief:</p>
 <pre class="r"><code>param_sensitive &lt;- c(&quot;Intercept&quot; = -0.5,
                      &quot;gender (Woman)&quot; = 0.25,
                      &quot;age&quot; = 0.01,
@@ -288,13 +287,14 @@ lin_pred &lt;- cbind(1,
                   A$education == &quot;High school&quot;,
                   A$education == &quot;College&quot;) %*% param_sensitive
 
+# Simulate whether respondents hold sensitive belief
 A$true_belief &lt;- rbinom(n, 1, prob = plogis(lin_pred))</code></pre>
-<p>The proportion of respondents in our sample that holds the sensitive belief is the following:</p>
+<p>The proportion of respondents in our sample that holds the sensitive belief is:</p>
 <pre class="r"><code>prop.table(table(A$true_belief))</code></pre>
 <pre><code>
      0      1 
-0.5358 0.4642 </code></pre>
-<p>We’ll now simulate whether each respondent who holds the sensitive belief misreports it when asked directly. For the purpose of this vignette, we’ll set the effect of treatment assignment on misreporting to 0. In other words, respondents who receive the treatment list are neither more nor less likely to misreport on the direct question (this constraint could also be relaxed).</p>
+0.5319 0.4681 </code></pre>
+<p>We’ll now simulate whether each respondent who holds the sensitive belief misreports it when asked directly. For the purpose of this vignette, we’ll set the effect of treatment assignment on misreporting to 0. In other words, respondents who receive the treatment list are neither more nor less likely to misreport on the direct question when it is asked later in the survey (one can also relax this constraint and model it if desired).</p>
 <pre class="r"><code>param_misreport &lt;- c(&quot;Intercept&quot; = -0.5,
                      &quot;gender (Woman)&quot; = -0.3,
                      &quot;age&quot; = -0.01,
@@ -311,9 +311,9 @@ lin_pred &lt;- cbind(1,
 
 A$misreport &lt;- rbinom(n, 1, prob = plogis(lin_pred))
 
-# By the monotonicity assumption, only those who hold the sensitive belief misreport it. Therefore, if true_belief = 0, so too does the misreport indicator.
+# By the monotonicity assumption, only those who hold the sensitive belief misreport it. Therefore, if true_belief = 0, then a respondent does not misreport.
 A$misreport[A$true_belief == 0] &lt;- 0</code></pre>
-<p>Lastly, for the control-items sub-model, we’ll set the number of control items to <span class="math inline">\(J = 4\)</span>. We’ll also set the parameter <span class="math inline">\(U\)</span> in the control-items sub-model to 0. In other words, those who misreport do not respond to the control items differently from those who do not (this too could be relaxed).</p>
+<p>Lastly, for the control-items sub-model, we’ll set the number of control items to <span class="math inline">\(J = 4\)</span>. We’ll also set the parameter <span class="math inline">\(U\)</span> in the control-items sub-model to 0. In other words, those who misreport do not respond to the control items differently from those who do not (this too can be relaxed).</p>
 <pre class="r"><code>J &lt;- 4
 
 param_control &lt;- c(&quot;Intercept&quot; = -0.25,
@@ -332,39 +332,38 @@ lin_pred &lt;- cbind(1,
                   A$misreport,
                   A$true_belief) %*% param_control
 
-# Response to the control items
+# Simulate responses to the control items
 A$y_star &lt;- rbinom(n, J, prob = plogis(lin_pred))</code></pre>
-<p>Putting it all together, we can calculate respondents’ answers to the list experiment and direct question:</p>
+<p>Putting it all together, we can calculate respondents’ answers to both the list experiment and direct question:</p>
 <pre class="r"><code># List experiment response
 A$y &lt;- A$y_star + A$true_belief * A$treatment
 
 # Direct question response
-A$direct &lt;- A$true_belief
-A$direct[A$misreport == 1] &lt;- 0</code></pre>
+A$direct &lt;- ifelse(A$misreport == 1, 0, A$true_belief)</code></pre>
 <p>Our data now appear as follows:</p>
 <pre class="r"><code># Display first 10 rows of the data
 print(A[1:10, ], row.names = FALSE)</code></pre>
 <pre><code>  i age gender         education treatment true_belief misreport y_star y direct
-  1  50    Man           College         1           0         0      2 2      0
-  2  58  Woman Below high school         0           1         1      3 3      0
-  3  75    Man Below high school         1           1         0      1 2      1
-  4  23    Man       High school         0           1         0      2 2      1
-  5  62  Woman       High school         0           0         0      3 3      0
-  6  19  Woman           College         0           1         0      1 1      1
-  7  66    Man Below high school         1           1         1      2 3      0
-  8  63  Woman           College         1           0         0      1 1      0
-  9  61  Woman           College         0           0         0      2 2      0
- 10  72  Woman           College         0           1         0      4 4      1</code></pre>
-<p>As we can see in these data, the first three respondents happen to represent the three types of respondents that we are aiming to model:</p>
+  1  47  Woman       High school         0           0         0      3 3      0
+  2  87  Woman Below high school         0           1         0      3 3      1
+  3  57    Man Below high school         0           1         1      4 4      0
+  4  73    Man           College         1           1         0      3 4      1
+  5  58    Man           College         0           1         1      3 3      0
+  6  48  Woman       High school         0           1         1      2 2      0
+  7  52  Woman       High school         0           1         1      1 1      0
+  8  62  Woman       High school         0           0         0      0 0      0
+  9  35    Man       High school         1           0         0      4 4      0
+ 10  36  Woman Below high school         1           0         0      2 2      0</code></pre>
+<p>In our simulated data, the first three respondents happen to represent the three respondent types of interest:</p>
 <ul>
 <li><p>Respondent 1 does not hold the sensitive belief and therefore does not misreport it (<code>true_belief = 0, misreport = 0, direct = 0</code>).</p></li>
-<li><p>Respondent 2 holds the sensitive belief, but misreports it (<code>true_belief = 1, misreport = 1, direct = 0</code>).</p></li>
-<li><p>Respondent 3 holds the sensitive belief and does not misreport it (<code>true_belief = 1, misreport = 0, direct = 1</code>).</p></li>
+<li><p>Respondent 2 holds the sensitive belief and does not misreport it (<code>true_belief = 1, misreport = 0, direct = 1</code>).</p></li>
+<li><p>Respondent 3 holds the sensitive belief, but misreports it (<code>true_belief = 1, misreport = 1, direct = 0</code>).</p></li>
 </ul>
 </div>
 <div id="section4" class="section level1">
 <h1>4. Analysis</h1>
-<p>To model the data, we use the function <code>listExperiment()</code>. This function is the workhorse of the <a href="https://cran.r-project.org/package=misreport"><code>misreport</code></a> package and aims to model (1) the response to the control items, (2) the response to the sensitive item, and (3) whether the response to the direct question is equivalent to a respondent’s true belief.</p>
+<p>To model the responses to the list experiment and direct question, we use the function <code>listExperiment()</code>, which is the workhorse of the <a href="https://cran.r-project.org/package=misreport"><code>misreport</code></a> package. This function aims to model (1) the response to the control items, (2) the response to the sensitive item, and (3) whether the response to the direct question is a respondent’s true belief.</p>
 <p>We run the function as follows:</p>
 <pre class="r"><code>library(misreport)
 
@@ -373,11 +372,10 @@ model.1 &lt;- listExperiment(y ~ 1 + gender + age + education,
                           treatment = &quot;treatment&quot;,
                           direct = &quot;direct&quot;,
                           sensitive.response = 1,
-
                           control.constraint = &quot;partial&quot;,
                           misreport.treatment = FALSE)</code></pre>
-<p>There are two notable arguments here. First, <code>control.constraint</code> is set to <code>&quot;partial&quot;</code>. This corresponds to the simulation data being set up such that those who misreport do not respond differently to the control items compared to those who do not misreport. To test this, we could set this argument to <code>&quot;none&quot;</code>, thereby including a parameter for <span class="math inline">\(U\)</span> in the control-items sub-model. Alternatively, setting <code>control.constraint</code> to <code>&quot;full&quot;</code> would remove both the parameters <span class="math inline">\(U\)</span> and <span class="math inline">\(Z\)</span> from the control-items sub-model. Doing so would mean that we are assuming that neither misreporting nor holding the sensitive belief predicts responses to the control items.</p>
-<p>Second, <code>misreport.treatment</code> is set to <code>FALSE</code>. This corresponds to our data-generating process in which treatment assignment does not affect whether respondents misreport. Theoretically, such a relationship might exist because respondents in the treatment group recall their response to the sensitive item in the list experiment and provide the same response to the direct question for reasons of cognitive ease or to be consistent on principle. It is therefore advised that researchers separate the list experiment and direct question far apart in a survey when possible to help avoid this possibility. If treatment assignment does affect misreporting, setting <code>misreport.treatment</code> to <code>TRUE</code> will add a predictor representing treatment status to the misreport sub-model.</p>
+<p>There are two notable arguments here. First, <code>control.constraint</code> is set to <code>&quot;partial&quot;</code>. This corresponds to our simulation data being set up such that those who misreport do not respond differently to the control items compared to those who do not misreport (i.e. implicitly <span class="math inline">\(U = 0\)</span> in the control-items submodel). To model this, we could set the argument to <code>&quot;none&quot;</code>, which will include a parameter for <span class="math inline">\(U\)</span> in the control-items sub-model to be estimated. Alternatively, setting <code>control.constraint</code> to <code>&quot;full&quot;</code> would remove both of the parameters <span class="math inline">\(U\)</span> and <span class="math inline">\(Z\)</span> from the control-items sub-model (i.e. implicitly set <span class="math inline">\(U = 0\)</span> and <span class="math inline">\(Z = 0\)</span>). Doing this would mean, effectively, that we are assuming that neither misreporting nor holding the sensitive belief predicts responses to the control items.</p>
+<p>Second, <code>misreport.treatment</code> is set to <code>FALSE</code>. This corresponds to our data-generating process such that receipt of the treatment list does not affect whether respondents misreport. Theoretically, such a relationship might exist because respondents in the treatment group recall their response to the sensitive item in the list experiment and provide the same response to the direct question for reasons of, say, cognitive simplicity or perhaps to be consistent on principle. It is advised that researchers separate the list experiment and direct question far apart in a survey when possible to help avoid this possibility. If treatment assignment does affect misreporting, however, setting <code>misreport.treatment</code> to <code>TRUE</code> will add a parameter representing treatment status to the misreport sub-model to model this relationship.</p>
 <p>After model fitting, summary output from the model can be obtained using <code>summary()</code> as follows:</p>
 <pre class="r"><code># Show 3 significant digits
 summary(model.1, digits = 3)</code></pre>
@@ -386,112 +384,106 @@ List experiment sub-models
 
 Call: listExperiment(formula = y ~ 1 + gender + age + education, data = A, 
     treatment = &quot;treatment&quot;, J = J, direct = &quot;direct&quot;, sensitive.response = 1, 
-    control.constraint = &quot;partial&quot;, misreport.treatment = FALSE)
+    control.constraint = &quot;partial&quot;, misreport.treatment = FALSE, 
+    n.runs = 1)
 
 CONTROL ITEMS Pr(Y* = y)
                        est.    se       z     p
-(Intercept)          -0.283 0.044  -6.377 0.000
-genderWoman           0.268 0.025  10.869 0.000
-age                   0.011 0.001  18.830 0.000
-educationHigh school -0.301 0.032  -9.436 0.000
-educationCollege     -0.550 0.031 -17.729 0.000
-Z                     0.250 0.025   9.850 0.000
+(Intercept)          -0.192 0.048  -3.975 0.000
+genderWoman           0.274 0.026  10.465 0.000
+age                   0.009 0.001  14.956 0.000
+educationHigh school -0.280 0.034  -8.322 0.000
+educationCollege     -0.543 0.033 -16.507 0.000
+Z                     0.240 0.027   8.976 0.000
 ---
 
 SENSITIVE ITEM Pr(Z* = 1)
                        est.    se      z     p
-(Intercept)          -0.508 0.154 -3.295 0.005
-genderWoman           0.254 0.087  2.934 0.010
-age                   0.008 0.002  3.715 0.002
-educationHigh school -0.191 0.105 -1.821 0.087
-educationCollege     -0.461 0.104 -4.443 0.000
+(Intercept)          -0.400 0.183 -2.185 0.029
+genderWoman           0.024 0.101  0.237 0.813
+age                   0.012 0.002  5.279 0.000
+educationHigh school -0.335 0.118 -2.826 0.005
+educationCollege     -0.619 0.118 -5.229 0.000
 ---
 
 MISREPORT Pr(U* = 1)
                        est.    se      z     p
-(Intercept)          -0.236 0.302 -0.781 0.446
-genderWoman          -0.464 0.180 -2.580 0.020
-age                  -0.018 0.004 -4.113 0.001
-educationHigh school  0.327 0.230  1.422 0.174
-educationCollege      0.601 0.222  2.702 0.016
+(Intercept)          -0.260 0.297 -0.876 0.381
+genderWoman          -0.524 0.166 -3.168 0.002
+age                  -0.010 0.004 -2.557 0.011
+educationHigh school  0.291 0.192  1.511 0.131
+educationCollege      0.364 0.199  1.827 0.068
 ---
 
 Observations: 10,000 (0 of 10,000 observations removed due to missingness)
-Log-likelihood -20266.67</code></pre>
-<pre><code># Recalling the population parameters:
+Log-likelihood -20398.8</code></pre>
+<pre><code># Recalling the population parameters for comparison:
 Control:   -0.25  0.25  0.01 -0.25 -0.50  0.25 
 Sensitive: -0.50  0.25  0.01 -0.30 -0.50 
 Misreport: -0.50 -0.30 -0.01  0.30  0.50</code></pre>
 </div>
-<div id="useful-quantities-of-interest" class="section level1">
-<h1>4. Useful quantities of interest</h1>
+<div id="some-useful-quantities-of-interest" class="section level1">
+<h1>4. Some useful quantities of interest</h1>
 <div id="predicted-probabilities" class="section level2">
 <h2>4.1. Predicted probabilities</h2>
-<p>It will often be the case that reseachers will want to summarize model output by generating predicted probabilities. The simplest way to do this is using <code>predict()</code>. To demonstrate this function, we’ll use it below by focusing on the variable <code>gender</code> and calculating the mean difference in the predicted probability of misreporting between men and women:</p>
+<p>It will often be the case that reseachers will want to summarize model output by generating predicted probabilities. The simplest way to do this is using the function <code>predict()</code>, which generates predictions separately for whether an individual holds the sensitive belief (<code>z.hat</code>) and whether an individual misreports (<code>u.hat</code>). To demonstrate this function, we’ll use it below by focusing on the variable <code>gender</code> and calculating the mean difference in the predicted probability of misreporting between men and women:</p>
 <pre class="r"><code># Predicted probabilities of misreporting (covariates held at their observed values)
 pred.woman &lt;- predict(model.1, newdata = data.frame(A[, names(A) != &quot;gender&quot;], gender = &quot;Woman&quot;))$u.hat
 
 pred.man &lt;- predict(model.1, newdata = data.frame(A[, names(A) != &quot;gender&quot;], gender = &quot;Man&quot;))$u.hat</code></pre>
-<pre class="r"><code># Mean predicted probability of misreporting (women)
+<pre class="r"><code># Mean predicted probability of misreporting (gender set to &quot;Woman&quot;)
 mean(pred.woman)</code></pre>
-<pre><code>[1] 0.2209041</code></pre>
-<pre class="r"><code># Mean predicted probability of misreporting (men)
+<pre><code>[1] 0.2587654</code></pre>
+<pre class="r"><code># Mean predicted probability of misreporting (gender set to &quot;Man&quot;)
 mean(pred.man)</code></pre>
-<pre><code>[1] 0.3072176</code></pre>
+<pre><code>[1] 0.3694153</code></pre>
 <pre class="r"><code># Mean difference in predicted probabilities of misreporting between women and men
 mean(pred.woman - pred.man)</code></pre>
-<pre><code>[1] -0.08631352</code></pre>
-<p>Because misreporting, by assumption, occurs only among those who hold the sensitive belief, we might prefer to calculate differences in predicted probabilities only among the sub-sample of respondents who hold the sensitive belief. By the nature of the list experiment, we don’t know who among the sample truly holds the sensitive belief, but we can instead weight by the posterior predicted probabilities that each respondent holds that belief. These probabilities fall out naturally from the EM procedure and are available in the fitted model object as the component <code>w</code>:</p>
+<pre><code>[1] -0.1106498</code></pre>
+<p>Because misreporting occurs, by assumption, only among those who hold the sensitive belief, we might prefer to calculate differences in predicted probabilities only among the sub-sample of respondents who hold the sensitive belief. By the nature of the list experiment, we don’t know who among our sample truly holds the sensitive belief, but we can instead weight by the posterior predicted probabilities that each respondent does. These probabilities fall out naturally from the EM procedure and are available in the fitted model object as the component <code>w</code>:</p>
 <pre class="r"><code># Display first 10 rows of posterior predicted probabilities
 model.1$w[1:10, ]</code></pre>
 <pre><code>      Misreport sensitive Truthful sensitive Non-sensitive
- [1,]          0.12833926                  0     0.8716607
- [2,]          0.16345291                  0     0.8365471
- [3,]          0.00000000                  1     0.0000000
- [4,]          0.00000000                  1     0.0000000
- [5,]          0.17927092                  0     0.8207291
- [6,]          0.00000000                  1     0.0000000
- [7,]          0.13951683                  0     0.8604832
- [8,]          0.02192377                  0     0.9780762
- [9,]          0.14740616                  0     0.8525938
-[10,]          0.00000000                  1     0.0000000</code></pre>
-<p>If we sum across the first two columns of each row, we have the probabilities that each respondent holds the sensitive belief.<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> We can therefore weight the predicted probabilities of misreporting as follows:</p>
-<pre class="r"><code>weighted.mean(pred.man - pred.woman, rowSums(model.1$w[, 1:2]))</code></pre>
-<pre><code>[1] 0.08406952</code></pre>
-<p>Note further that whether a respondent is a man or woman also affects responses to the sensitive item itself. We could therefore alternatively calculate predicted probabilities of whether each respondent both holds the sensitive response and misreports it.</p>
-<p>Lastly, we can also compare the predicted proportion of the sample who misreports to the true proportion in the sample:</p>
-<pre class="r"><code># Mean predicted probability of misreporting
-# among sub-sample holding the sensitive belief
-weighted.mean(predict(model.1)$u.hat, rowSums(model.1$w[, 1:2]))</code></pre>
-<pre><code>[1] 0.2518653</code></pre>
-<pre class="r"><code># Proportion of those who misreport in the simulated sample
-mean(A$misreport[A$true_belief == 1])</code></pre>
-<pre><code>[1] 0.277682</code></pre>
+ [1,]           0.2204961                  0     0.7795039
+ [2,]           0.0000000                  1     0.0000000
+ [3,]           0.3737128                  0     0.6262872
+ [4,]           0.0000000                  1     0.0000000
+ [5,]           0.2677970                  0     0.7322030
+ [6,]           0.1824359                  0     0.8175641
+ [7,]           0.1507975                  0     0.8492025
+ [8,]           0.1256164                  0     0.8743836
+ [9,]           0.6479408                  0     0.3520592
+[10,]           0.0731082                  0     0.9268918</code></pre>
+<p>If we sum across the first two columns of each row, we have the probabilities that each respondent holds the sensitive belief.<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> We might therefore weight our predicted probabilities of misreporting as follows:</p>
+<pre class="r"><code>weighted.mean(pred.woman - pred.man, rowSums(model.1$w[, 1:2]))</code></pre>
+<pre><code>[1] -0.1088317</code></pre>
+<p>Note that whether a respondent is a man or woman also affects responses to the sensitive item itself. One should therefore use the sample for these predicted probabilities as one sees fit.</p>
 </div>
 <div id="simulating-predicted-probabilities" class="section level2">
 <h2>4.2. Simulating predicted probabilities</h2>
-<p>To quantify uncertainty in the predicted probabilities, we can turn to simulation <span class="citation">(King, Tomz, and Wittenberg 2000)</span>. First, we’ll simulate 500 batches of model parameters:</p>
-<pre class="r"><code>n_sims &lt;- 500
+<p>To quantify uncertainty in the predicted probabilities, we can use simulation <span class="citation">(King, Tomz, and Wittenberg 2000)</span>. First, we’ll simulate 1000 batches of model parameters:</p>
+<pre class="r"><code>n_sims &lt;- 1000
 
 # Simulate model parameters
 coefs &lt;- c(model.1$par.control, model.1$par.sens, model.1$par.misreport)
 par_sim &lt;- mvtnorm::rmvnorm(n_sims, coefs, model.1$vcov.mle)
 
-# The matrix of parameters for the misreport submodel
+# Get the matrix of parameters for the misreport submodel
+# Note that the parameter estimates in par_sim are in the following order: control, sensitive, misreport
 par_sim_misreport &lt;- par_sim[, (length(coefs)-length(model.1$par.misreport)+1):length(coefs)]</code></pre>
-<p>We now have 500 batches of parameters for the misreport sub-model, the first 10 rows of which appear as follows:</p>
+<p>We now have 1000 batches of parameters for the misreport sub-model, the first 10 rows of which appear as follows:</p>
 <pre class="r"><code>par_sim_misreport[1:10, ]</code></pre>
-<pre><code>      (Intercept) genderWoman         age educationHigh school educationCollege
- [1,] -0.24831962  -0.4568064 -0.01424072          0.194078523        0.3760071
- [2,]  0.23180059  -0.2754316 -0.02439730          0.155030225        0.5514485
- [3,]  0.29086779  -0.5903968 -0.02349122          0.079863161        0.3236970
- [4,] -0.30660578  -0.1629836 -0.02269328          0.343485861        0.9181253
- [5,]  0.07974329  -0.8445375 -0.02107409          0.401709755        0.7968517
- [6,] -0.02850963  -0.5043731 -0.02370183          0.704224214        0.6895712
- [7,] -0.46006380  -0.1715734 -0.02218951          0.592626713        0.8415346
- [8,] -0.13773697  -0.2991940 -0.01777390          0.175176477        0.3368902
- [9,] -0.12687926  -0.3666494 -0.01668053          0.008915554        0.1979390
-[10,]  0.07765489  -0.9983039 -0.01969899          0.404203518        0.5402056</code></pre>
+<pre><code>      (Intercept) genderWoman          age educationHigh school educationCollege
+ [1,]  -0.4997965  -0.3554420 -0.008850399           0.49011359        0.4378888
+ [2,]   0.1570283  -0.8961896 -0.014097916           0.19254676        0.4921500
+ [3,]   0.0760989  -0.5320369 -0.014109480          -0.02994769        0.2643022
+ [4,]  -0.4323941  -0.5119460 -0.006656752           0.37450219        0.6242772
+ [5,]  -0.3539957  -0.3561838 -0.010066673           0.32685083        0.4652617
+ [6,]  -0.3599190  -0.3308619 -0.006737198           0.01199662        0.4432342
+ [7,]  -0.2213338  -0.5662163 -0.011097655           0.31579604        0.3449018
+ [8,]  -0.3359534  -0.5654059 -0.005542622           0.28559999        0.1076779
+ [9,]  -0.5889371  -0.1545445 -0.008821937           0.66426281        0.6433846
+[10,]  -0.3778983  -0.5888047 -0.006623658           0.44411094        0.1663846</code></pre>
 <p>We can calculate the mean difference in predicted probabilities for each batch of parameters using <code>predict()</code>, setting <code>gender</code> first to <code>&quot;Woman&quot;</code> and then to <code>&quot;Man&quot;</code>:</p>
 <pre class="r"><code>pp_diff &lt;- rep(NA, n_sims)
 
@@ -505,13 +497,13 @@ for(i in 1:n_sims) {
   pp_diff[i] &lt;- mean(pp_woman - pp_man)
 
 }</code></pre>
-<p>Alternatively, we could use <code>weighted.mean()</code> instead of <code>mean()</code> to weight these differences by the posterior predicted probabilities of each respondent holding the sensitive belief or those calculated using the parameters in the sensitive-item sub-model.</p>
-<p>Finally, we use these simulated differences in predicted probabilities to quantify our uncertainty in the predicted difference in misreporting between men and women:</p>
+<p>Alternatively, we could use <code>weighted.mean()</code> instead of <code>mean()</code> to weight the predicted differences in misreporting by the predicted probabilities of each respondent holding the sensitive belief or those calculated using the parameters in the sensitive-item sub-model.</p>
+<p>Finally, we use these simulated differences to quantify our uncertainty in the predicted difference in misreporting between men and women:</p>
 <pre class="r"><code>mean(pp_diff)</code></pre>
-<pre><code>[1] -0.09017887</code></pre>
-<pre class="r"><code>quantile(pp_diff, c(0.05, 0.95)) # 90%</code></pre>
-<pre><code>         5%         95% 
--0.15057799 -0.03164911 </code></pre>
+<pre><code>[1] -0.1101213</code></pre>
+<pre class="r"><code>quantile(pp_diff, c(0.05, 0.95)) # 90% interval</code></pre>
+<pre><code>        5%        95% 
+-0.1679831 -0.0486495 </code></pre>
 </div>
 </div>
 <div id="references" class="section level1">
@@ -522,7 +514,7 @@ for(i in 1:n_sims) {
 <p>Blair, Graeme, Kosuke Imai, Bethany Park, Alexander Coppock, and Winston Chou. 2016. “list: Statistical Methods for the Item Count Technique and List Experiment.” <em>The Comprehensive R Archive Network (CRAN)</em>.</p>
 </div>
 <div id="ref-Eady2017">
-<p>Eady, Gregory. 2016. “The Statistical Analysis of Misreporting on Sensitive Survey Questions,” 1–22.</p>
+<p>Eady, Gregory. Forthcoming. “The Statistical Analysis of Misreporting on Sensitive Survey Questions.” <em>Political Analysis</em>, 1–19.</p>
 </div>
 <div id="ref-King2000">
 <p>King, Gary, Michael Tomz, and Jason Wittenberg. 2000. “Making the Most of Statistical Analyses: Improving Interpretation and Presentation.” <em>American Journal of Political Science</em> 44 (2): 341–55.</p>

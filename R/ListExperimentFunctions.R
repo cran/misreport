@@ -22,7 +22,8 @@ logAdd <- function(lx, ly) {
 #'
 #' @importFrom stats .getXlevels as.formula binomial coef
 #'             cov dbinom model.matrix model.frame model.response
-#'             na.pass plogis pt rnorm runif glm 
+#'             na.pass plogis pt pnorm rnorm runif glm 
+#' @importFrom mvtnorm rmvnorm
 mstepMisreport <- function(y, x.misreport, w, treat,
                               misreport.treatment, weight) {
 
@@ -598,7 +599,7 @@ estep <- function(y, w, x.control, x.sensitive, x.outcome, x.misreport, treat, J
 #' 
 #' @details The \code{listExperiment} function allows researchers to fit a model
 #'          for a list experiment and direct question simultaneously, as
-#'          described in Eady (2016). The primary aim of the function is
+#'          described in Eady (2017). The primary aim of the function is
 #'          to allow researchers to model the probability that respondents
 #'          provides one response to the sensitive item in a list experiment
 #'          but respond otherwise when asked about the same sensitive item on a
@@ -647,7 +648,7 @@ estep <- function(y, w, x.control, x.sensitive, x.outcome, x.misreport, treat, J
 #' @slot call The method call.
 #' @slot boot A logical value indicating whether non-parametric bootstrapping was used to calculate model parameters and standard errors.
 #' 
-#' @references Eady, Gregory. 2016 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
+#' @references Eady, Gregory. 2017 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
 #' @references Imai, Kosuke. 2011. "Multivariate Regression Analysis for the Item Count Technique." \emph{Journal of the American Statistical Association} 106 (494): 407-416.
 #' 
 #' @examples
@@ -696,7 +697,7 @@ estep <- function(y, w, x.control, x.sensitive, x.outcome, x.misreport, treat, J
 #' }
 #'
 #'
-#' ## EXAMPLE 2: Data from Eady (2016)
+#' ## EXAMPLE 2: Data from Eady (2017)
 #' data(gender)
 #'
 #' \dontrun{
@@ -721,7 +722,7 @@ listExperiment <- function(formula, data, treatment, J,
                            control.constraint = "none",
                            misreport.treatment = TRUE,
                            weights = NULL, se = TRUE, tolerance = 1E-8,
-                           max.iter = 10000, n.runs = 1, verbose = TRUE,
+                           max.iter = 10000, n.runs = 3, verbose = TRUE,
                            get.data = FALSE,
                            par.control = NULL, par.sensitive = NULL,
                            par.misreport = NULL, par.outcome = NULL,
@@ -1425,7 +1426,7 @@ listExperiment <- function(formula, data, treatment, J,
 #' @slot call The method call.
 #' @slot boot A logical value indicating whether non-parametric bootstrapping was used to calculate model parameters and standard errors.
 #' 
-#' @references Eady, Gregory. 2016 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
+#' @references Eady, Gregory. 2017 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
 #' @references Imai, Kosuke. 2011. "Multivariate Regression Analysis for the Item Count Technique." \emph{Journal of the American Statistical Association} 106 (494): 407-416.
 #' 
 #' @examples
@@ -1484,7 +1485,7 @@ bootListExperiment <- function(formula, data, treatment, J,
                                outcome.constrained = TRUE, control.constraint = "partial",
                                misreport.treatment = TRUE,
                                weights = NULL, se = TRUE, tolerance = 1E-8, max.iter = 5000,
-                               n.runs = 10, verbose = TRUE, get.data = FALSE,
+                               n.runs = 1, verbose = TRUE, get.data = FALSE,
                                par.control = NULL, par.sensitive = NULL, par.misreport = NULL,
                                par.outcome = NULL, par.outcome.aux = NULL,
                                formula.control = NULL, formula.sensitive = NULL,
@@ -1634,7 +1635,7 @@ bootListExperiment <- function(formula, data, treatment, J,
 #' @slot z.hat Predicted probability of answering affirmatively to the sensitive item in the list experiment.
 #' @slot u.hat Predicted probability of misreporting (assuming respondent holds the sensitive belief).
 #' 
-#' @references Eady, Gregory. 2016 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
+#' @references Eady, Gregory. 2017 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
 #' 
 #' @examples
 #' 
@@ -1746,7 +1747,7 @@ predict.listExperiment <- function(object, newdata = NULL,
 #' @details \code{summary.listExperiment} summarizes the information contained
 #' in a listExperiment object for each list experiment regression sub-model.
 #' 
-#' @references Eady, Gregory. 2016 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
+#' @references Eady, Gregory. 2017 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
 #' 
 #' @examples
 #' data(gender)
@@ -1775,7 +1776,7 @@ summary.listExperiment <- function(object, digits = 4, ...) {
     matrix.control <- cbind(round(object$par.control, digits),
                             round(object$se.control, digits),
                             round(object$par.control/object$se.control, digits),
-                            round(2 * pt(abs(object$par.control/object$se.control), object$n - object$df, lower.tail = FALSE), digits))
+                            round(2 * pnorm(abs(object$par.control/object$se.control), lower.tail = FALSE), digits))
     colnames(matrix.control) <- c("est.", "se", "z", "p")
     print(formatC(matrix.control, format = "f", digits = digits), quote = FALSE, right = TRUE)
     cat("---\n")
@@ -1784,7 +1785,7 @@ summary.listExperiment <- function(object, digits = 4, ...) {
     matrix.sensitive <- cbind(round(object$par.sensitive, digits),
                               round(object$se.sensitive, digits),
                               round(object$par.sensitive/object$se.sensitive, digits),
-                              round(2 * pt(abs(object$par.sensitive/object$se.sensitive), object$n - object$df, lower.tail = FALSE), digits))
+                              round(2 * pnorm(abs(object$par.sensitive/object$se.sensitive), lower.tail = FALSE), digits))
     colnames(matrix.sensitive) <- c("est.", "se", "z", "p")
     print(formatC(matrix.sensitive, format = "f", digits = digits), quote = FALSE, right = TRUE)
     cat("---\n")
@@ -1794,7 +1795,7 @@ summary.listExperiment <- function(object, digits = 4, ...) {
       matrix.misreport <- cbind(round(object$par.misreport, digits),
                                    round(object$se.misreport, digits),
                                    round(object$par.misreport/object$se.misreport, digits),
-                                   round(2 * pt(abs(object$par.misreport/object$se.misreport), object$n - object$df, lower.tail = FALSE), digits))
+                                   round(2 * pnorm(abs(object$par.misreport/object$se.misreport), lower.tail = FALSE), digits))
       colnames(matrix.misreport) <- c("est.", "se", "z", "p")
       print(formatC(matrix.misreport, format = "f", digits = digits), quote = FALSE, right = TRUE)
       cat("---\n")
@@ -1805,7 +1806,7 @@ summary.listExperiment <- function(object, digits = 4, ...) {
       matrix.outcome <- cbind(round(object$par.outcome, digits),
                               round(object$se.outcome, digits),
                               round(object$par.outcome/object$se.outcome, digits),
-                              round(2 * pt(abs(object$par.outcome/object$se.outcome), object$n - object$df, lower.tail = FALSE), digits))
+                              round(2 * pnorm(abs(object$par.outcome/object$se.outcome), lower.tail = FALSE), digits))
       colnames(matrix.outcome) <- c("est.", "se", "z", "p")
       print(formatC(matrix.outcome, format = "f", digits = digits), quote = FALSE, right = TRUE)
       cat("---")

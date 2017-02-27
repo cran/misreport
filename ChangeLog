@@ -1,3 +1,10 @@
+misreport 0.1.1 (2017-02-26)
+============================
+
+  * Added vignette
+  * Changed default number of EM runs to 3
+  * Cleaned up and fixed summary()
+
 misreport 0.1.0 (2016-12-04)
 ============================
 

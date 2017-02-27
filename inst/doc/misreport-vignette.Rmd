@@ -1,0 +1,429 @@
+---
+date: "Last updated: `r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: false
+    toc_float: false
+    theme: default
+    highlight: default
+bibliography: "Bibliography.bib"
+biblio-style: apsr
+comment: ""
+vignette: >
+  %\VignetteIndexEntry{misreport Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+params:
+  EVAL: !r identical(Sys.getenv("NOT_CRAN"), "true")
+---
+
+<!--- 
+rmarkdown::render("~/Dropbox (Personal)/Software/misreport/vignettes/misreport-vignette.Rmd")
+-->
+
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,900' rel='stylesheet' type='text/css'>
+
+<script type="text/x-mathjax-config"> 
+    MathJax.Hub.Config({ 
+        "HTML-CSS": { scale: 91, linebreaks: { automatic: true } }, 
+        SVG: { linebreaks: { automatic:true } }, 
+        displayAlign: "center" });
+</script>
+
+<style>
+  @media {
+    .container-fluid{
+      max-width: 750px;
+    }
+  }
+
+  body {
+    background: #F6F6F6;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+  }
+
+  mark {
+    background-color: #E9E9E9;
+    color: #000000;
+  }
+
+  pre {
+    background-color: #FFFFFF;
+    border-radius: 0px;
+    border-width: 1px;
+    border-style: dotted;
+    border-color: #3B3B3B;
+
+  }
+
+  p {
+    padding-top: 10px;
+  }
+
+  .container-fluid h1,
+  .container-fluid h2,
+  .container-fluid h3,
+  .container-fluid h4{
+    color:#000000;
+    font-weight: 600;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .container-fluid h1{
+    text-align: left;
+    letter-spacing: 1px;
+    font-weight: 900;
+    font-size: 30px;
+    padding-top:10px;
+    padding-bottom:5px;
+  }
+
+  .container-fluid h2{
+    text-align: left;
+    letter-spacing: 1px;
+    font-weight: 900;
+    font-size: 20px;
+    padding-bottom:5px;
+  }
+
+  blockquote {
+    border-left: 0px solid;
+    padding-left: 40px;
+    padding-top: 14px;
+    padding-bottom: 18px;
+    padding-right: 40px;
+    background-color: #F6F6F6;
+    border-top: 0px;
+    border-bottom: 0px;
+    margin: 0px;
+    background-position: middle left;
+    background-repeat: no-repeat;
+    text-indent: 0px;
+    font-size: 16px;
+    letter-spacing: 0px;
+    /*line-height: 22px;*/
+    font-family: 'Lato', sans-serif;
+  }
+
+  a:link,
+  a:visited,
+  a:hover,
+  a:active {
+    color: #5300C9;
+  }
+
+  hr {
+    width: 100%;
+    margin-left: 0; 
+    margin-right: auto; 
+    height: 0px;
+    border: 1px;
+    color: #5300C9;
+    border-top: dotted 1px;
+  }
+
+</style>
+
+
+```{r set-options, include = FALSE}
+options(width = 10000)
+knitr::opts_chunk$set(comment = "")
+set.seed(121)
+```
+
+<!-- BEGIN DOCUMENT -->
+
+<h1 style = "font-size: 32px; margin-bottom: 0px; padding-bottom:0px;">The Statistical Analysis of Misreporting on Sensitive Survey Questions</h1>
+<h2 style = "font-size: 26px; margin-top: 15px">Using the [`misreport`](https://cran.r-project.org/package=misreport) package in R</h2>
+<h5 style = "margin-top: 30px; font-weight: 300">**Gregory Eady** (February 26, 2017)</h5>
+<hr style = "margin-bottom: 0px; margin-top: 18px; border:1px; border-top: dotted 1px; color:#5300C9">
+
+
+# 1. Introduction {#section1}
+
+This document provides a brief introduction to the R package [`misreport`](https://cran.r-project.org/package=misreport). The package implements the method introduced in @Eady2017 to permit researchers to statistically examine the predictors of misreporting on sensitive survey questions. In brief, the goal of the method is to model whether survey respondents provide one response to a sensitive item in a list experiment --- a measurement technique designed to elicit a truthful response --- but answer otherwise when asked to reveal that response openly on a direct question.^[Another useful vignette for analysis of a list experiment and direct question can be found [here](https://cran.r-project.org/package=list/vignettes/combined-list.html) by the authors of the [`list`](https://cran.r-project.org/package=list) package [@Blair2016].] [`misreport`](https://cran.r-project.org/package=misreport) is made available through the Comprehensive R Archive Network (CRAN).
+
+# 2. Covariates {#section2}
+
+Before turning to the data-generating process that characterizes the setup for the list experiment and direct question, we first simulate survey respondents and their characteristics. These respondent characteristics will later be used as predictors of the control items, sensitive belief, and misreporting.
+
+To begin, let's say that we have $10000$ respondents $i = 1, \ldots, 10000$ in a data.frame `A`:
+
+```{r}
+n <- 10000
+A <- data.frame(i = 1:n)
+```
+
+For concreteness, we will generate respondent characteristics that we will say represent age, gender, and education:
+
+```{r}
+A$age <- round(runif(n, 18, 90))
+A$gender <- sample(c("Woman", "Man"), n, replace = TRUE, prob = c(0.52, 0.48))
+A$education <- sample(c("Below high school",
+                        "High school",
+                        "College"),
+                      n, replace = TRUE, prob = c(0.25, 0.35, 0.4))
+A$education <- factor(A$education, levels = c("Below high school",
+                                              "High school",
+                                              "College"))
+```
+
+Our simulated data now appear as follows:
+
+```{r}
+# Display first 10 rows of the data
+print(A[1:10, ], row.names = FALSE)
+```
+
+# 3. Data-generating process {#section3}
+
+We now simulate responses to a list experiment and a direct question. In this vignette, we'll assume that answering affirmatively to the sensitive item is to give the socially unacceptable response. In other words, responses of $Z_i = 1$ or $D_i = 1$ indicate providing the socially unacceptable response, where $Z_i$ denotes the response to the sensitive item in the list experiment and $D_i$ denotes the response to the direct question.
+
+To begin, we'll first assign each respondent at random to the treatment or control group:
+
+```{r}
+A$treatment <- sample(c(rep(0, n/2), rep(1, n/2)), n)
+```
+
+We'll define the population parameters in the sensitive-item sub-model as follows and then simulate whether respondents hold the sensitive belief:
+
+```{r}
+param_sensitive <- c("Intercept" = -0.5,
+                     "gender (Woman)" = 0.25,
+                     "age" = 0.01,
+                     "education (High school)" = -0.3,
+                     "education (College)" = -0.5)
+
+lin_pred <- cbind(1,
+                  A$gender == "Woman",
+                  A$age,
+                  A$education == "High school",
+                  A$education == "College") %*% param_sensitive
+
+# Simulate whether respondents hold sensitive belief
+A$true_belief <- rbinom(n, 1, prob = plogis(lin_pred))
+```
+
+The proportion of respondents in our sample that holds the sensitive belief is:
+
+```{r}
+prop.table(table(A$true_belief))
+```
+
+We'll now simulate whether each respondent who holds the sensitive belief misreports it when asked directly. For the purpose of this vignette, we'll set the effect of treatment assignment on misreporting to 0. In other words, respondents who receive the treatment list are neither more nor less likely to misreport on the direct question when it is asked later in the survey (one can also relax this constraint and model it if desired).
+
+```{r}
+param_misreport <- c("Intercept" = -0.5,
+                     "gender (Woman)" = -0.3,
+                     "age" = -0.01,
+                     "education (High school)" = 0.3,
+                     "education (College)" = 0.5,
+                     "treatment" = 0)
+
+lin_pred <- cbind(1,
+                  A$gender == "Woman",
+                  A$age,
+                  A$education == "High school",
+                  A$education == "College",
+                  A$treatment) %*% param_misreport
+
+A$misreport <- rbinom(n, 1, prob = plogis(lin_pred))
+
+# By the monotonicity assumption, only those who hold the sensitive belief misreport it. Therefore, if true_belief = 0, then a respondent does not misreport.
+A$misreport[A$true_belief == 0] <- 0
+```
+
+Lastly, for the control-items sub-model, we'll set the number of control items to $J = 4$. We'll also set the parameter $U$ in the control-items sub-model to 0. In other words, those who misreport do not respond to the control items differently from those who do not (this too can be relaxed).
+
+```{r}
+J <- 4
+
+param_control <- c("Intercept" = -0.25,
+                   "gender (female)" = 0.25,
+                   "age" = 0.01,
+                   "education (high school)" = -0.25,
+                   "education (college)" = -0.5,
+                   "U" = 0,
+                   "Z" = 0.25)
+
+lin_pred <- cbind(1,
+                  A$gender == "Woman",
+                  A$age,
+                  A$education == "High school",
+                  A$education == "College",
+                  A$misreport,
+                  A$true_belief) %*% param_control
+
+# Simulate responses to the control items
+A$y_star <- rbinom(n, J, prob = plogis(lin_pred))
+```
+
+Putting it all together, we can calculate respondents' answers to both the list experiment and direct question:
+
+```{r}
+# List experiment response
+A$y <- A$y_star + A$true_belief * A$treatment
+
+# Direct question response
+A$direct <- ifelse(A$misreport == 1, 0, A$true_belief)
+```
+
+Our data now appear as follows:
+
+```{r}
+# Display first 10 rows of the data
+print(A[1:10, ], row.names = FALSE)
+```
+
+In our simulated data, the first three respondents happen to represent the three respondent types of interest:
+
+  * Respondent 1 does not hold the sensitive belief and therefore does not misreport it (`true_belief = 0, misreport = 0, direct = 0`).
+  
+  * Respondent 2 holds the sensitive belief and does not misreport it (`true_belief = 1, misreport = 0, direct = 1`).
+
+  * Respondent 3 holds the sensitive belief, but misreports it (`true_belief = 1, misreport = 1, direct = 0`).
+
+
+# 4. Analysis {#section4}
+
+To model the responses to the list experiment and direct question, we use the function `listExperiment()`, which is the workhorse of the [`misreport`](https://cran.r-project.org/package=misreport) package. This function aims to model (1) the response to the control items, (2) the response to the sensitive item, and (3) whether the response to the direct question is a respondent's true belief.
+
+We run the function as follows:
+
+```{r cache = FALSE, echo = FALSE, include = FALSE}
+library(misreport)
+
+model.1 <- listExperiment(y ~ 1 + gender + age + education,
+                          data = A, J = J,
+                          treatment = "treatment",
+                          direct = "direct",
+                          sensitive.response = 1,
+                          n.runs = 1,
+                          control.constraint = "partial",
+                          misreport.treatment = FALSE)
+```
+```{r eval = FALSE}
+library(misreport)
+
+model.1 <- listExperiment(y ~ 1 + gender + age + education,
+                          data = A, J = J,
+                          treatment = "treatment",
+                          direct = "direct",
+                          sensitive.response = 1,
+                          control.constraint = "partial",
+                          misreport.treatment = FALSE)
+```
+
+There are two notable arguments here. First, `control.constraint` is set to `"partial"`. This corresponds to our simulation data being set up such that those who misreport do not respond differently to the control items compared to those who do not misreport (i.e. implicitly $U = 0$ in the control-items submodel). To model this, we could set the argument to `"none"`, which will include a parameter for $U$ in the control-items sub-model to be estimated. Alternatively, setting `control.constraint` to `"full"` would remove both of the parameters $U$ and $Z$ from the control-items sub-model (i.e. implicitly set $U = 0$ and $Z = 0$). Doing this would mean, effectively, that we are assuming that neither misreporting nor holding the sensitive belief predicts responses to the control items.
+
+Second, `misreport.treatment` is set to `FALSE`. This corresponds to our data-generating process such that receipt of the treatment list does not affect whether respondents misreport. Theoretically, such a relationship might exist because respondents in the treatment group recall their response to the sensitive item in the list experiment and provide the same response to the direct question for reasons of, say, cognitive simplicity or perhaps to be consistent on principle. It is advised that researchers separate the list experiment and direct question far apart in a survey when possible to help avoid this possibility. If treatment assignment does affect misreporting, however, setting `misreport.treatment` to `TRUE` will add a parameter representing treatment status to the misreport sub-model to model this relationship.
+
+After model fitting, summary output from the model can be obtained using `summary()` as follows:
+
+```{r eval = FALSE}
+# Show 3 significant digits
+summary(model.1, digits = 3)
+```
+```{r echo = FALSE}
+# Show 3 significant digits
+summary(model.1, digits = 3)
+
+# Recalling the population parameters:
+cat("# Recalling the population parameters for comparison:\nControl:  ",
+    format(param_control[-6], nsmall = 2),
+    "\nSensitive:",
+    format(param_sensitive, nsmall = 2),
+    "\nMisreport:",
+    format(param_misreport[-6], nsmall = 2))
+```
+
+# 4. Some useful quantities of interest
+
+## 4.1. Predicted probabilities
+
+It will often be the case that reseachers will want to summarize model output by generating predicted probabilities. The simplest way to do this is using the function `predict()`, which generates predictions separately for whether an individual holds the sensitive belief (`z.hat`) and whether an individual misreports (`u.hat`). To demonstrate this function, we'll use it below by focusing on the variable `gender` and calculating the mean difference in the predicted probability of misreporting between men and women:
+
+```{r}
+# Predicted probabilities of misreporting (covariates held at their observed values)
+pred.woman <- predict(model.1, newdata = data.frame(A[, names(A) != "gender"], gender = "Woman"))$u.hat
+
+pred.man <- predict(model.1, newdata = data.frame(A[, names(A) != "gender"], gender = "Man"))$u.hat
+```
+
+```{r}
+# Mean predicted probability of misreporting (gender set to "Woman")
+mean(pred.woman)
+# Mean predicted probability of misreporting (gender set to "Man")
+mean(pred.man)
+# Mean difference in predicted probabilities of misreporting between women and men
+mean(pred.woman - pred.man)
+```
+
+Because misreporting occurs, by assumption, only among those who hold the sensitive belief, we might prefer to calculate differences in predicted probabilities only among the sub-sample of respondents who hold the sensitive belief. By the nature of the list experiment, we don't know who among our sample truly holds the sensitive belief, but we can instead weight by the posterior predicted probabilities that each respondent does. These probabilities fall out naturally from the EM procedure and are available in the fitted model object as the component `w`:
+
+```{r}
+# Display first 10 rows of posterior predicted probabilities
+model.1$w[1:10, ]
+```
+
+If we sum across the first two columns of each row, we have the probabilities that each respondent holds the sensitive belief.^[Note that the column of respondents of the type "Truthful sensitive" have probabilities of 0 or 1 because these are respondents who have either answered affirmatively (or not) to the direct question. By the monotonicity assumption, those who openly admit to holding the sensitive belief are assumed not to be misreporting.] We might therefore weight our predicted probabilities of misreporting as follows:
+
+```{r}
+weighted.mean(pred.woman - pred.man, rowSums(model.1$w[, 1:2]))
+```
+
+Note that whether a respondent is a man or woman also affects responses to the sensitive item itself. One should therefore use the sample for these predicted probabilities as one sees fit.
+
+
+## 4.2. Simulating predicted probabilities
+
+To quantify uncertainty in the predicted probabilities, we can use simulation [@King2000]. First, we'll simulate 1000 batches of model parameters:
+
+```{r}
+n_sims <- 1000
+
+# Simulate model parameters
+coefs <- c(model.1$par.control, model.1$par.sens, model.1$par.misreport)
+par_sim <- mvtnorm::rmvnorm(n_sims, coefs, model.1$vcov.mle)
+
+# Get the matrix of parameters for the misreport submodel
+# Note that the parameter estimates in par_sim are in the following order: control, sensitive, misreport
+par_sim_misreport <- par_sim[, (length(coefs)-length(model.1$par.misreport)+1):length(coefs)]
+```
+
+We now have 1000 batches of parameters for the misreport sub-model, the first 10 rows of which appear as follows:
+
+```{r}
+par_sim_misreport[1:10, ]
+```
+
+We can calculate the mean difference in predicted probabilities for each batch of parameters using `predict()`, setting `gender` first to `"Woman"` and then to `"Man"`:
+
+```{r cache = FALSE}
+pp_diff <- rep(NA, n_sims)
+
+# For each row of parameters, calculate the mean difference in predicted probabilities
+for(i in 1:n_sims) {
+
+  pp_woman <- predict(model.1, newdata = data.frame(A[, names(A) != "gender"], gender = "Woman"), par.misreport = par_sim_misreport[i, ])$u.hat
+
+  pp_man <- predict(model.1, newdata = data.frame(A[, names(A) != "gender"], gender = "Man"), par.misreport = par_sim_misreport[i, ])$u.hat
+
+  pp_diff[i] <- mean(pp_woman - pp_man)
+
+}
+```
+
+Alternatively, we could use `weighted.mean()` instead of `mean()` to weight the predicted differences in misreporting by the predicted probabilities of each respondent holding the sensitive belief or those calculated using the parameters in the sensitive-item sub-model.
+
+Finally, we use these simulated differences to quantify our uncertainty in the predicted difference in misreporting between men and women:
+
+```{r}
+mean(pp_diff)
+quantile(pp_diff, c(0.05, 0.95)) # 90% interval
+```
+
+# References
+<hr style = "margin-bottom: 22px; margin-top: 12px; border:1px; border-top: dotted 1px; color:#5300C9">
+

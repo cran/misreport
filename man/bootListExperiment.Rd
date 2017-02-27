@@ -9,7 +9,7 @@ bootListExperiment(formula, data, treatment, J, direct = NULL,
   outcome.model = "logistic", outcome.constrained = TRUE,
   control.constraint = "partial", misreport.treatment = TRUE,
   weights = NULL, se = TRUE, tolerance = 1e-08, max.iter = 5000,
-  n.runs = 10, verbose = TRUE, get.data = FALSE, par.control = NULL,
+  n.runs = 1, verbose = TRUE, get.data = FALSE, par.control = NULL,
   par.sensitive = NULL, par.misreport = NULL, par.outcome = NULL,
   par.outcome.aux = NULL, formula.control = NULL,
   formula.sensitive = NULL, formula.misreport = NULL,
@@ -227,7 +227,7 @@ summary(model.sim, digits = 3)
 
 }
 \references{
-Eady, Gregory. 2016 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
+Eady, Gregory. 2017 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
 
 Imai, Kosuke. 2011. "Multivariate Regression Analysis for the Item Count Technique." \emph{Journal of the American Statistical Association} 106 (494): 407-416.
 }

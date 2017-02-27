@@ -8,7 +8,7 @@ listExperiment(formula, data, treatment, J, direct = NULL,
   sensitive.response = NULL, outcome = NULL, outcome.trials = NULL,
   outcome.model = "logistic", outcome.constrained = TRUE,
   control.constraint = "none", misreport.treatment = TRUE, weights = NULL,
-  se = TRUE, tolerance = 1e-08, max.iter = 10000, n.runs = 1,
+  se = TRUE, tolerance = 1e-08, max.iter = 10000, n.runs = 3,
   verbose = TRUE, get.data = FALSE, par.control = NULL,
   par.sensitive = NULL, par.misreport = NULL, par.outcome = NULL,
   par.outcome.aux = NULL, formula.control = NULL,
@@ -92,7 +92,7 @@ Regression analysis for sensitive survey questions using a list experiment and d
 \details{
 The \code{listExperiment} function allows researchers to fit a model
          for a list experiment and direct question simultaneously, as
-         described in Eady (2016). The primary aim of the function is
+         described in Eady (2017). The primary aim of the function is
          to allow researchers to model the probability that respondents
          provides one response to the sensitive item in a list experiment
          but respond otherwise when asked about the same sensitive item on a
@@ -222,7 +222,7 @@ summary(model.sim, digits = 3)
 }
 
 
-## EXAMPLE 2: Data from Eady (2016)
+## EXAMPLE 2: Data from Eady (2017)
 data(gender)
 
 \dontrun{
@@ -239,7 +239,7 @@ summary(model.gender)
 
 }
 \references{
-Eady, Gregory. 2016 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
+Eady, Gregory. 2017 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
 
 Imai, Kosuke. 2011. "Multivariate Regression Analysis for the Item Count Technique." \emph{Journal of the American Statistical Association} 106 (494): 407-416.
 }

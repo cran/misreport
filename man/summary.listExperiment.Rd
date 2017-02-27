@@ -37,6 +37,6 @@ summary(model.gender)
 
 }
 \references{
-Eady, Gregory. 2016 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
+Eady, Gregory. 2017 "The Statistical Analysis of Misreporting on Sensitive Survey Questions."
 }
 
